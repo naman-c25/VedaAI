@@ -1,11 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Minus, Plus } from "lucide-react";
+import { Minus, Plus, AlertTriangle } from "lucide-react";
 
 const ZOOM_STEPS = [60, 80, 100, 125, 150, 200];
 
-export default function AnswerSheetPanel({ pages, activeQuestion, unmatched }) {
+export default function AnswerSheetPanel({
+  pages,
+  activeQuestion,
+  unmatched,
+  highlightsUnavailable,
+}) {
   const scrollRef = useRef(null);
   const pageRefs = useRef([]);
   const regionRefs = useRef({});
@@ -16,8 +21,8 @@ export default function AnswerSheetPanel({ pages, activeQuestion, unmatched }) {
 
   // Bring the selected answer into view. Runs whenever the selection changes.
   useEffect(() => {
-    if (regions.length === 0) return;
-    const first = regions[0];
+    const first = regions.find((r) => r.rect);
+    if (!first) return;
     const el = regionRefs.current[first.blockId];
     if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [activeQuestion?.id]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -76,6 +81,17 @@ export default function AnswerSheetPanel({ pages, activeQuestion, unmatched }) {
         </span>
       </div>
 
+      {highlightsUnavailable && (
+        <div className="flex shrink-0 items-start gap-2 border-b border-[#f0ddc2] bg-[#fffaf1] px-4 py-2.5 text-[12.5px] leading-normal text-[#8a5c10]">
+          <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+          <span>
+            The answers were read and graded, but the model could not return their positions on
+            the page this time, so nothing can be highlighted. Everything else on the left is
+            accurate. Running it again usually fixes it.
+          </span>
+        </div>
+      )}
+
       <div
         ref={scrollRef}
         onScroll={handleScroll}
@@ -84,8 +100,9 @@ export default function AnswerSheetPanel({ pages, activeQuestion, unmatched }) {
         <div className="mx-auto flex flex-col items-center gap-4" style={{ width: `${zoom}%` }}>
           {pages.map((page, i) => {
             const pageNo = i + 1;
-            const onThisPage = regions.filter((r) => r.page === pageNo);
-            const strays = unmatched.filter((u) => u.page === pageNo);
+            // Answers the model could not locate have no rect and simply are not drawn.
+            const onThisPage = regions.filter((r) => r.page === pageNo && r.rect);
+            const strays = unmatched.filter((u) => u.page === pageNo && u.rect);
 
             return (
               <div

@@ -87,6 +87,16 @@ try1  textLen=4032   ← answers came back with no box_2d  → rejected
 try2  textLen=3966   ← asked again, boxes present        → accepted
 ```
 
+Each model gets **three** attempts, because on the lite fallbacks the box field goes missing often
+enough that two was not sufficient in practice.
+
+**If every attempt still fails, the run degrades instead of erroring.** The last parseable
+response is used, blocks keep their text with `rect: null`, and mapping, grading, feedback and the
+summary all work normally — only the green highlights are absent, and the answer-sheet panel says
+so plainly. A teacher with a fully graded paper and no boxes is far better served than one staring
+at a 500. This matters because the box field is the *only* thing the lite models drop; the
+transcription and the numbering come back fine.
+
 **3. Mapping and grading** (`mapAndGrade`)
 This pass is text-only — it receives the question list and the transcribed blocks, not the
 images. It matches on the student's written label first, falls back to content matching for

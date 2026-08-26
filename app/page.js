@@ -64,11 +64,20 @@ export default function Home() {
 
       setProgress(42);
       setProgressStage(`Found ${questions.length} questions · reading the answer sheet…`);
-      const { blocks, student } = await callApi({ action: "answers", pages: answer.pages });
+      const { blocks, student, highlightsUnavailable } = await callApi({
+        action: "answers",
+        pages: answer.pages,
+      });
 
       setProgress(76);
       setProgressStage(`Found ${blocks.length} answers · mapping and grading…`);
-      const assembled = await callApi({ action: "map", questions, blocks, student });
+      const assembled = await callApi({
+        action: "map",
+        questions,
+        blocks,
+        student,
+        highlightsUnavailable,
+      });
 
       setProgress(94);
       setProgressStage("Aligning highlights to the handwriting…");
@@ -207,6 +216,7 @@ export default function Home() {
               pages={answer.pages}
               activeQuestion={activeQuestion}
               unmatched={result.unmatched}
+              highlightsUnavailable={result.summary.highlightsUnavailable}
             />
           </div>
         )}

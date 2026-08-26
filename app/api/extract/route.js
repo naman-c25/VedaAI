@@ -40,10 +40,10 @@ export async function POST(request) {
 
     if (action === "answers") {
       const pages = validPages(body.pages, "answer sheet");
-      const { blocks, student } = await extractAnswers(pages);
+      const { blocks, student, highlightsUnavailable } = await extractAnswers(pages);
       // Zero blocks is a legitimate outcome - a blank sheet. The mapping stage
       // will report every question as unanswered.
-      return NextResponse.json({ blocks, student });
+      return NextResponse.json({ blocks, student, highlightsUnavailable });
     }
 
     if (action === "map") {
@@ -57,7 +57,9 @@ export async function POST(request) {
         blocks.length > 0
           ? await mapAndGrade(questions, blocks, student)
           : { results: [], unmatchedBlocks: [], overallFeedback: "" };
-      return NextResponse.json(assemble(questions, blocks, mapping, student));
+      return NextResponse.json(
+        assemble(questions, blocks, mapping, student, Boolean(body.highlightsUnavailable))
+      );
     }
 
     return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 });
