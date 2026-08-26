@@ -8,8 +8,34 @@
   --color-muted: #8b8b8b;
   --color-line: #ededed;
   --color-shell: #e9e9e9;
+  /* Highlight states: full marks, partial, nothing earned */
   --color-ok: #22c55e;
+  --color-warn: #f59e0b;
+  --color-bad: #ef4444;
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+/*
+ * Tailwind v4's preflight drops the browser default `cursor: pointer` on
+ * buttons, so every clickable element would otherwise show an arrow. Setting it
+ * once here beats remembering a class on each control.
+ */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+label[for],
+summary,
+select:not(:disabled) {
+  cursor: pointer;
+}
+
+button:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+/* Number inputs the teacher edits read as text, not as a click target. */
+input[type="number"] {
+  cursor: text;
 }
 
 html, body { height: 100%; }

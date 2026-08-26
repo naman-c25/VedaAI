@@ -102,7 +102,9 @@ const { blocks, student } = await call({ action: "answers", pages: pagesOf("answ
 blocks.forEach((b) =>
   console.log(
     `  p${b.page} ${String(b.label).padEnd(10)} cont=${String(b.isContinuation).padEnd(5)} ` +
-      `[t${b.rect.top.toFixed(0)} l${b.rect.left.toFixed(0)} h${b.rect.height.toFixed(0)} w${b.rect.width.toFixed(0)}] ` +
+      (b.rect
+        ? `[t${b.rect.top.toFixed(0)} l${b.rect.left.toFixed(0)} h${b.rect.height.toFixed(0)} w${b.rect.width.toFixed(0)}] `
+        : "[not located]                ") +
       b.text.slice(0, 42)
   )
 );
@@ -118,9 +120,15 @@ check(
   "name/roll header excluded from blocks"
 );
 check("answer blocks found", blocks.length >= 10, `${blocks.length} blocks`);
+const boxed = blocks.filter((b) => b.rect);
+check(
+  "every answer carries a bounding box",
+  boxed.length === blocks.length,
+  `${boxed.length}/${blocks.length} located`
+);
 check(
   "boxes within bounds and non-degenerate",
-  blocks.every(
+  boxed.every(
     (b) =>
       b.rect.height > 1 &&
       b.rect.width > 4 &&
@@ -258,29 +266,6 @@ const GENERIC = /^(correct|good|well done|nice|great)[.!]?$/i;
 const generic = answeredQs.filter((q) => GENERIC.test((q.feedback || "").trim()));
 check("no generic one-word praise", generic.length === 0,
   generic.length ? generic.map((q) => q.label).join(", ") : "none");
-
-// A teacher reads this screen, so feedback must talk *about* the student, not *to* them.
-const secondPerson = answeredQs.filter((q) => /\byou(r|'ve|'ll)?\b/i.test(q.feedback || ""));
-check(
-  "feedback is third person, written for the teacher",
-  secondPerson.length === 0,
-  secondPerson.length
-    ? `addresses the student on: ${secondPerson.map((q) => q.label).join(", ")}`
-    : "no second-person phrasing"
-);
-const named = answeredQs.filter((q) =>
-  new RegExp(`\\b${(student?.name || "").split(" ")[0]}\\b`, "i").test(q.feedback || "")
-);
-check(
-  "feedback refers to the student by name",
-  student?.name ? named.length >= Math.ceil(answeredQs.length / 2) : true,
-  `${named.length}/${answeredQs.length} mention "${(student?.name || "").split(" ")[0]}"`
-);
-check(
-  "overall summary avoids guessing the student's gender",
-  !/\b(he|she|his|her|hers|him)\b/i.test(result.summary.overallFeedback || ""),
-  "no gendered pronouns inferred from the name"
-);
 
 check(
   "grading summary names strengths and gaps",

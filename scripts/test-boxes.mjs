@@ -20,7 +20,7 @@ const SCALE = 0.5;
 // lib/refine.js is ESM inside a CJS package, so hand Node a .mjs copy to import.
 const shim = join(DIR, ".refine.mjs");
 writeFileSync(shim, readFileSync(join(process.cwd(), "lib", "refine.js")));
-const { buildInkMask, refineRect } = await import(`file://${shim.replace(/\\/g, "/")}`);
+const { buildInkMask, refineRect, findBands, deriveRects } = await import(`file://${shim.replace(/\\/g, "/")}`);
 unlinkSync(shim);
 
 const truth = JSON.parse(readFileSync(join(DIR, "ground-truth.json"), "utf8"));
@@ -138,3 +138,47 @@ console.log(`>=0.75 IoU      : ${rows.filter((r) => r.bestIou >= 0.75).length} -
 const ok = refMean > rawMean && worsened === 0;
 console.log(`\n${ok ? "PASS" : "REVIEW"}  refinement ${ok ? "improves every box" : "needs a look"}`);
 if (!ok) process.exitCode = 1;
+
+/* ==================================================================== */
+/* Fallback: deriving positions from ink when the model omits box_2d     */
+/* ==================================================================== */
+console.log("\n=== INK-BAND FALLBACK (no API) ===");
+
+let derivedOk = 0;
+let derivedTotal = 0;
+let pagesResolved = 0;
+
+for (let p = 0; p < truth.pages.length; p++) {
+  const expected = truth.pages[p].blocks;
+  const bands = findBands(masks[p]);
+  const derived = deriveRects(bands, expected.length);
+
+  if (!derived) {
+    console.log(
+      `  page ${p + 1}: ${bands.length} ink bands vs ${expected.length} answers — no confident mapping`
+    );
+    continue;
+  }
+
+  pagesResolved++;
+  const ious = derived.map((rect, i) => iou(rect, expected[i].rect));
+  const mean = ious.reduce((a, b) => a + b, 0) / ious.length;
+  derivedTotal += ious.length;
+  derivedOk += ious.filter((v) => v >= 0.5).length;
+  console.log(
+    `  page ${p + 1}: ${expected.length} answers matched, mean IoU ${mean.toFixed(3)} ` +
+      `(${ious.map((v) => v.toFixed(2)).join(", ")})`
+  );
+}
+
+console.log(
+  `\n  pages resolved : ${pagesResolved}/${truth.pages.length}` +
+    `\n  boxes >=0.5 IoU: ${derivedOk}/${derivedTotal}`
+);
+const fallbackOk = pagesResolved >= truth.pages.length - 1 && derivedOk === derivedTotal;
+console.log(
+  fallbackOk
+    ? "PASS  ink-band fallback recovers usable positions"
+    : "REVIEW  ink-band fallback needs a look"
+);
+if (!fallbackOk) process.exitCode = 1;

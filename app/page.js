@@ -217,6 +217,7 @@ export default function Home() {
               activeQuestion={activeQuestion}
               unmatched={result.unmatched}
               highlightsUnavailable={result.summary.highlightsUnavailable}
+              highlightsEstimated={result.summary.highlightsEstimated}
             />
           </div>
         )}

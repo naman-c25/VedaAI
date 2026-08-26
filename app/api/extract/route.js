@@ -55,7 +55,7 @@ export async function POST(request) {
       const student = body.student || {};
       const mapping =
         blocks.length > 0
-          ? await mapAndGrade(questions, blocks, student)
+          ? await mapAndGrade(questions, blocks)
           : { results: [], unmatchedBlocks: [], overallFeedback: "" };
       return NextResponse.json(
         assemble(questions, blocks, mapping, student, Boolean(body.highlightsUnavailable))

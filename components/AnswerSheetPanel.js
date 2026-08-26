@@ -5,11 +5,31 @@ import { Minus, Plus, AlertTriangle } from "lucide-react";
 
 const ZOOM_STEPS = [60, 80, 100, 125, 150, 200];
 
+/**
+ * Highlight colour follows the marks, so a teacher can see at a glance whether
+ * the answer they are looking at earned everything, something, or nothing.
+ * Class strings are written out in full because Tailwind only emits classes it
+ * can see literally in the source.
+ */
+const TONES = {
+  ok: { box: "border-ok bg-ok/12", tag: "bg-ok", dot: "bg-ok", label: "Full marks" },
+  warn: { box: "border-warn bg-warn/12", tag: "bg-warn", dot: "bg-warn", label: "Partial" },
+  bad: { box: "border-bad bg-bad/12", tag: "bg-bad", dot: "bg-bad", label: "No marks" },
+};
+
+function toneFor(q) {
+  if (!q) return "warn";
+  if (q.maxScore > 0 && q.score >= q.maxScore) return "ok";
+  if (q.score <= 0) return "bad";
+  return "warn";
+}
+
 export default function AnswerSheetPanel({
   pages,
   activeQuestion,
   unmatched,
   highlightsUnavailable,
+  highlightsEstimated = 0,
 }) {
   const scrollRef = useRef(null);
   const pageRefs = useRef([]);
@@ -18,6 +38,7 @@ export default function AnswerSheetPanel({
   const [currentPage, setCurrentPage] = useState(1);
 
   const regions = activeQuestion?.regions || [];
+  const tone = TONES[toneFor(activeQuestion)];
 
   // Bring the selected answer into view. Runs whenever the selection changes.
   useEffect(() => {
@@ -50,6 +71,15 @@ export default function AnswerSheetPanel({
       <div className="flex h-11.5 shrink-0 items-center gap-3 border-b border-line px-4">
         <h2 className="text-[14px] font-bold">Answer Sheet</h2>
 
+        <div className="ml-1 flex items-center gap-2.5">
+          {["ok", "warn", "bad"].map((key) => (
+            <span key={key} className="flex items-center gap-1 text-[11px] font-medium text-muted">
+              <span className={`h-2 w-2 rounded-full ${TONES[key].dot}`} />
+              {TONES[key].label}
+            </span>
+          ))}
+        </div>
+
         <div className="flex-1" />
 
         <div className="flex items-center gap-1 rounded-full border border-line px-1 py-0.5">
@@ -81,13 +111,24 @@ export default function AnswerSheetPanel({
         </span>
       </div>
 
-      {highlightsUnavailable && (
+      {(highlightsUnavailable || highlightsEstimated > 0) && (
         <div className="flex shrink-0 items-start gap-2 border-b border-[#f0ddc2] bg-[#fffaf1] px-4 py-2.5 text-[12.5px] leading-normal text-[#8a5c10]">
           <AlertTriangle size={14} className="mt-0.5 shrink-0" />
           <span>
-            The answers were read and graded, but the model could not return their positions on
-            the page this time, so nothing can be highlighted. Everything else on the left is
-            accurate. Running it again usually fixes it.
+            {highlightsUnavailable ? (
+              <>
+                The answers were read and graded, but their positions on the page could not be
+                recovered this time, so nothing can be highlighted. Everything on the left is
+                still accurate. Running it again usually fixes it.
+              </>
+            ) : (
+              <>
+                {highlightsEstimated} highlight{highlightsEstimated === 1 ? " was" : "s were"}{" "}
+                placed by matching the writing on the page, because the model did not return
+                {highlightsEstimated === 1 ? " its" : " their"} position. Those are drawn with a
+                dashed border.
+              </>
+            )}
           </span>
         </div>
       )}
@@ -138,7 +179,9 @@ export default function AnswerSheetPanel({
                   <div
                     key={r.blockId}
                     ref={(el) => (regionRefs.current[r.blockId] = el)}
-                    className="pointer-events-none absolute rounded-md border-2 border-ok bg-ok/12 transition-all duration-300"
+                    className={`pointer-events-none absolute rounded-md border-2 transition-all duration-300 ${tone.box} ${
+                      r.derived ? "border-dashed" : ""
+                    }`}
                     // The rect hugs the ink exactly; a fixed pixel outset keeps
                     // the border off the glyphs without distorting the geometry.
                     style={{
@@ -148,9 +191,13 @@ export default function AnswerSheetPanel({
                       height: `calc(${r.rect.height}% + 8px)`,
                     }}
                   >
-                    <span className="absolute -top-2.25 left-1 rounded bg-ok px-1.5 py-px text-[11px] font-bold leading-3.5 text-white">
+                    <span
+                      className={`absolute -top-2.25 left-1 rounded px-1.5 py-px text-[11px] font-bold leading-3.5 text-white ${tone.tag}`}
+                    >
                       {shortLabel(activeQuestion.label)}
                       {r.isContinuation ? " cont." : ""}
+                      {" · "}
+                      {activeQuestion.score}/{activeQuestion.maxScore}
                     </span>
                   </div>
                 ))}

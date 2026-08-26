@@ -200,14 +200,6 @@ function GradingSummary({ summary }) {
         Grading Summary
       </p>
 
-      {summary.student?.name && (
-        <p className="mt-1 text-[13px] font-semibold text-[#5f5f5f]">
-          {summary.student.name}
-          {summary.student.roll && (
-            <span className="font-medium text-muted"> · Roll {summary.student.roll}</span>
-          )}
-        </p>
-      )}
 
       <div className="mt-2.5 flex items-baseline gap-2">
         <span className="text-[26px] font-extrabold leading-none tabular-nums">

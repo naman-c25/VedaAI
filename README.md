@@ -26,18 +26,14 @@ without ever needing the original pixel dimensions.
 
 ### Feedback and the grading summary
 
-Feedback is written **for the teacher, about the student, in the third person** — a teacher is
-reading this screen, not the student, so it never says "you". The student's name and roll number
-are read off the answer-sheet header during answer extraction (the header is reported separately,
-never emitted as an answer block) and carried into grading, so comments read "Aarav did not name
-the valves…" rather than "You did not name…". With no name on the sheet it falls back to "The
-student".
+Feedback is addressed to the student as "you". A third-person version using the student's name
+was tried and reverted — the direct voice read better.
 
-Where a pronoun is unavoidable the prompt requires **they/their**. A name does not reveal
-someone's gender, and a wrong guess misgenders a real child on their own report — the test suite
-asserts no gendered pronoun appears in the summary.
+The student's name and roll number are still read off the answer-sheet header during answer
+extraction, but only so the header is recognised *as a header*: it gets reported separately and
+never emitted as an answer block, which otherwise leaves it floating in the unmatched list.
 
-Feedback is also required to be **technical and specific to the question asked** — it must name the
+Feedback is required to be **technical and specific to the question asked** — it must name the
 actual terms, structures, formulas and units involved, drawn from the question wording and from
 what the student actually wrote. Generic praise is explicitly banned, and a fully correct answer
 must still teach something: the prompt requires one factual extension beyond confirming the
@@ -53,22 +49,65 @@ where marks were repeatedly lost — plus a **"Where the marks went"** table lis
 that dropped marks with its reason. Real output on the fixture paper:
 
 ```
-Q1  1/1  "Aarav correctly identified that arteries carry blood away from the heart. As an
-          extension, note that the pulmonary artery is the only artery in the adult human
-          body that carries deoxygenated blood."
+Q1  1/1  "You correctly identified that arteries carry blood away from the heart. Note that
+          while the aorta is the primary artery for systemic circulation, the pulmonary
+          artery also carries blood away from the heart to the lungs."
 
-Q5  2/3  "Aarav described the structure and function of the alveolus well, noting the
-          capillary network and the thin wall. However, the question specifically
-          requested a labelled diagram, which was not provided."
+Q5  2/3  "You provided a good description of the alveolar structure and the diffusion
+          process. However, you did not provide the requested labelled diagram to
+          illustrate the capillary network and air-space."
           missing: • a labelled diagram
 
-Q3  0/1  "Aarav incorrectly identified the Watt as the unit of resistance. The Watt is the
-          SI unit of power, whereas the Ohm is the unit of electrical resistance."
+Q3  0/1  "You identified the Watt, which is the unit of power, not resistance. The SI unit
+          of electrical resistance is the Ohm (Ω), named after Georg Ohm."
           missing: • the Ohm
 
 strengths: photosynthesis stages | kidney ultrafiltration | Ohm's law
 gaps:      heart valve anatomy | leaf adaptations | SI units
 ```
+
+### Highlights are colour-coded by marks
+
+The green box the brief asks for is the *full marks* case. Two more states carry information a
+teacher wants at a glance, so the colour follows the score:
+
+| Colour | Meaning |
+|---|---|
+| Green | Full marks |
+| Amber | Partially correct |
+| Red | Answered but earned nothing |
+
+The tag on each box shows the question label and the score (`Q3 · 0/1`), and a legend sits in the
+panel header. Because the colour is derived from the current score, it updates the moment a
+teacher edits a mark.
+
+### Recovering positions the model never gave (the fallback that makes highlighting reliable)
+
+The lite fallback models frequently transcribe every answer correctly but omit `box_2d` entirely,
+which would leave a run with no highlights at all. `findBands()` in `lib/refine.js` recovers them
+from the page itself: it thresholds the page into ink, splits it into bands of writing separated
+by blank runs, and — since the model reports blocks in reading order and bands are in reading
+order too — zips the two together.
+
+It only does this **when the counts agree exactly**, first on the raw bands and then after
+dropping page furniture (short bands hugging the top or bottom edge — name headers, page numbers).
+A mismatch means we cannot be sure which band belongs to which answer, and a confidently wrong
+highlight is worse than none, so those stay unlocated. Derived boxes are drawn with a **dashed**
+border and the panel says how many were placed that way.
+
+Measured against ground truth by `scripts/test-boxes.mjs` — no API calls needed:
+
+```
+page 1: 3 answers matched, mean IoU 0.979    ← name header correctly dropped
+page 2: 3 answers matched, mean IoU 0.991
+page 3: 5 ink bands vs 4 answers — no confident mapping, left unlocated
+page 4: 3 answers matched, mean IoU 0.985
+page 5: 2 answers matched, mean IoU 0.991
+
+pages resolved : 4/5     boxes >=0.5 IoU: 11/11
+```
+
+Page 3 declining is the feature working, not failing.
 
 ### A response validator, not just an error handler
 
