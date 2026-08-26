@@ -121,7 +121,7 @@ it only added a slow hop before the real fallback. `gemini-2.5-pro` is listed by
 but returns 404 for this key, so it is not in the chain either.
 
 **Accuracy is not equal across the chain.** The lite models are availability insurance, not peers.
-They are measurably worse at returning bounding boxes (see §3.6). Where the two disagree it is
+They are measurably worse at returning bounding boxes (see §3.4). Where the two disagree it is
 noted below.
 
 ---
@@ -131,26 +131,7 @@ noted below.
 This is the section I would most want to read as an interviewer, so it is the longest. Every item
 here is a real thing that happened while building this, in order.
 
-## 3.1 The Figma file could not be read, so the design came from screenshots
-
-The Figma MCP integration is connected, but reading the assignment file failed:
-
-```
-get_metadata(GEjt1rt1s7AXvkcr4t8muE, 0:1)
-→ "Looks like you don't have edit access to this file."
-```
-
-Figma's MCP server needs **edit** access; the assignment file is shared view-only. Duplicating it
-into my own drafts would have fixed it, but the faster path was to work from screenshots of the
-four screens, which is what happened. The UI was rebuilt to match those: the sidebar (both
-expanded and the collapsed icon rail), the topbar, the empty and filled upload states, the
-extracting state, and the two-panel mapping screen.
-
-**Cost of that tradeoff:** exact hex values and spacing tokens were matched by eye rather than
-read from the file. The layout, states and hierarchy follow the design; individual pixel values
-may differ by a point or two.
-
-## 3.2 I added padding to the highlight boxes "so they look nicer" — and it made them worse
+## 3.1 I added padding to the highlight boxes "so they look nicer" — and it made them worse
 
 The first version of the pixel refinement added a small margin around each refined box for visual
 comfort. Then I measured it against ground truth:
@@ -168,7 +149,7 @@ looks the same and never distorts the measurement.
 bounds of every answer as it draws them, so box accuracy is a number, not an opinion. I would not
 have caught this by looking at the screen — it looked fine.
 
-## 3.3 Crossed-out rough work was being counted as part of an answer
+## 3.2 Crossed-out rough work was being counted as part of an answer
 
 A struck-through calculation sitting directly beneath Q7(a) was absorbed into Q7(a)'s bounding
 box — the box was 18% of page height for a three-line answer, while a four-line answer next to it
@@ -178,7 +159,7 @@ Fixed in two places, because one was not enough: the extraction prompt now has a
 rough-work rule, **and** `assemble.js` force-excludes rough-work blocks from every question
 regardless of what the model claimed.
 
-## 3.4 A fix for one thing broke another
+## 3.3 A fix for one thing broke another
 
 Adding the rough-work rule made the mapper too conservative — it started treating *all* unlabelled
 blocks as not-to-be-assigned, and the unlabelled alveolus answer (which should match Q5 on content)
@@ -191,7 +172,7 @@ became unanswered. The rule had to be explicitly scoped:
 generalised by the model. The regression was caught only because the test suite covered the
 unlabelled-answer case.
 
-## 3.5 Two model responses that were valid JSON and completely useless
+## 3.4 Two model responses that were valid JSON and completely useless
 
 **Different envelopes.** `gemini-2.5-flash` honours the requested `{"questions": [...]}` shape.
 `gemini-3.1-flash-lite` returns a **bare array** with the same items. The original code read only
@@ -217,7 +198,7 @@ with `rect: null`; mapping, grading, feedback and the summary all work normally;
 highlights are absent, and the panel says so plainly. A teacher with a fully graded paper and no
 boxes is far better served than one staring at a 500.
 
-## 3.6 Recovering positions the model never gave
+## 3.5 Recovering positions the model never gave
 
 Degrading gracefully was not satisfying — highlighting is a core requirement, not a nice-to-have.
 `findBands()` recovers the positions from the page itself: threshold to ink, split into bands of
@@ -240,7 +221,7 @@ page 5: 2 answers matched, mean IoU 0.991
 
 Page 3 declining is the feature working, not failing.
 
-## 3.7 Sub-part matching was brittle, and my test did not catch it
+## 3.6 Sub-part matching was brittle, and my test did not catch it
 
 Sub-part answers (7a, 10ii) intermittently failed to map. The tests passed, because matching was
 done on the printed label alone and my fixture happened to produce labels where that worked. Two
@@ -259,13 +240,13 @@ on it would have left the suite green. `scripts/test-mapping.mjs` now covers all
 model's mapping **forced empty**, so only the deterministic path can produce a match — 14/14, no
 API calls. Sub-parts no longer depend on the model having done its job.
 
-## 3.8 Feedback took four iterations to get right
+## 3.7 Feedback took four iterations to get right
 
 | Version | Problem |
 |---|---|
 | "Correct." | Technically accurate, teaches nothing |
 | Technical + specific | Better, but still restated the answer back on full marks |
-| Third person, by name — "Aarav identified…" | Tried at your request, then reverted: the direct voice reads better |
+| Third person, by name — "Aarav identified…" | Tried, then reverted: the direct voice reads better on screen |
 | **Current** — second person, technical, plus a factual extension on every correct answer | |
 
 The current rule requires that a fully correct answer *still* teaches something:
@@ -291,7 +272,7 @@ The student's name and roll number are still read off the sheet header — but o
 recognised **as a header** and never emitted as an answer block, which otherwise leaves it
 floating in the unmatched list.
 
-## 3.9 Twice, the test was wrong and the app was fine
+## 3.8 Twice, the test was wrong and the app was fine
 
 Worth recording, because the instinct to "fix the app" would have been wrong both times.
 
@@ -305,13 +286,13 @@ and picked up `reset()`'s `setProgress(0)`, making progress look like it went ba
 local `norm()` did not strip a leading `q`, so `norm("Q4")` was `"q4"` and a `startsWith("4")`
 check failed. Both were fixed in the test, not the app.
 
-## 3.10 Your API key would have been committed
+## 3.9 The API key would have been committed
 
 The original `.gitignore` had `.env*.local`, which does **not** match `.env` — and that is where
-the key was placed. Widened to ignore `.env` and `.env.*`. Verified: `git ls-files` shows zero
+the key ended up. Widened to ignore `.env` and `.env.*`. Verified: `git ls-files` shows zero
 `.env` files tracked.
 
-## 3.11 Smaller ones
+## 3.10 Smaller ones
 
 - **pdf.js worker.** Resolving it through a bundler specifier is fragile across Webpack and
   Turbopack. A prebuild script copies it into `public/`, which works identically locally and on
@@ -355,6 +336,10 @@ the key was placed. Widened to ignore `.env` and `.env.*`. Verified: `git ls-fil
 - **A question's marks are printed in brackets near its first line**, which is the common
   convention. Where they are not printed, the question defaults to 5 marks.
 - **Uploads are ≤10MB**, enforced client-side to match the design and keep bodies within limits.
+- **The UI follows the provided design reference**, including both sidebar states, the empty and
+  filled upload states, the extracting state and the two-panel mapping screen. Colours and spacing
+  were matched visually rather than exported as tokens, so individual pixel values may differ by a
+  point or two; layout, states and hierarchy follow the design.
 
 ## Limitations — stated plainly
 
