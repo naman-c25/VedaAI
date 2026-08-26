@@ -149,6 +149,19 @@ question whose number the student clearly wrote can therefore never be reported 
 because of a model omission. The same pass computes the grading summary and collects leftover
 blocks as unmatched.
 
+Sub-parts are where this matters most, and matching on the printed label alone turned out to be
+too brittle for them. Two cases broke it:
+
+- **A paper that prints only `(a)` under a `7.` stem.** The question's label normalises to `a`,
+  which never matches a student's `Q7(a)` → `7a`. Keys are now built from `number + subpart` as
+  well as from the label, so both forms match.
+- **A student who writes `Q10` once and then just `(ii)` beneath it.** A bare sub-part marker now
+  inherits the last parent number seen while walking the sheet in order.
+
+A bare `Q11` still refuses to claim `11 (a)` — a parent number is not an answer to a specific
+sub-part. `scripts/test-mapping.mjs` covers all of this with the model's mapping forced empty, so
+only the deterministic path can produce a match: **14/14, no API calls**.
+
 ### How the edge cases are handled
 
 | Case | Handling |

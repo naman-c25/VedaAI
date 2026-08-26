@@ -190,6 +190,24 @@ check(
   q10i?.status === "answered" && find("10ii")?.status === "answered",
   `10(i)=${q10i?.status}, 10(ii)=${find("10ii")?.status}`
 );
+// Every sub-part that has a written answer on the sheet must own a region.
+// 7(a) was previously extracted but never asserted, which hid mapping failures.
+const answeredSubparts = [
+  ["7 (a)", q7a],
+  ["9 (b)", q9b],
+  ["10 (i)", q10i],
+  ["10 (ii)", find("10ii")],
+];
+const orphaned = answeredSubparts.filter(
+  ([, q]) => !q || q.status !== "answered" || q.regions.length === 0
+);
+check(
+  "every sub-part with an answer on the sheet owns a region",
+  orphaned.length === 0,
+  orphaned.length
+    ? `not mapped: ${orphaned.map(([l, q]) => `${l}=${q?.status ?? "missing"}`).join(", ")}`
+    : answeredSubparts.map(([l, q]) => `${l}:${q.regions.length}`).join(" ")
+);
 check(
   "unlabelled answer matched on content",
   q5?.status === "answered" && /alveol/i.test(txt(q5)),
