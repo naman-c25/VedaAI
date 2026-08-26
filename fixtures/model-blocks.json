@@ -1,0 +1,212 @@
+[
+  {
+    "id": "b1",
+    "page": 1,
+    "label": "Q4",
+    "text": "Chloroplasts are the site of photosynthesis in the plant cell. They contain the green pigment chlorophyll which absorbs light energy, mainly from the red and blue parts of the spectrum. Photosynthesis takes place in two main stages. The first is the light reaction, which happens in the",
+    "isContinuation": false,
+    "isRoughWork": false,
+    "rect": {
+      "top": 7.8,
+      "left": 8.8,
+      "height": 15.2,
+      "width": 70.7
+    }
+  },
+  {
+    "id": "b2",
+    "page": 1,
+    "label": "Q1",
+    "text": "Arteries carry blood away from the heart. The aorta is the largest artery and carries oxygenated blood to the body.",
+    "isContinuation": false,
+    "isRoughWork": false,
+    "rect": {
+      "top": 26.2,
+      "left": 8.8,
+      "height": 7.3,
+      "width": 71
+    }
+  },
+  {
+    "id": "b3",
+    "page": 1,
+    "label": "2.",
+    "text": "The green pigment is chlorophyll.",
+    "isContinuation": false,
+    "isRoughWork": false,
+    "rect": {
+      "top": 36.5,
+      "left": 8.8,
+      "height": 4,
+      "width": 42.2
+    }
+  },
+  {
+    "id": "b4",
+    "page": 2,
+    "label": "Q4",
+    "text": "thylakoid membranes. Light energy splits water and produces ATP and NADPH, and oxygen is given off as a waste product. The second stage is the Calvin cycle in the stroma, which uses ATP to fix carbon dioxide into glucose.",
+    "isContinuation": true,
+    "isRoughWork": false,
+    "rect": {
+      "top": 7.8,
+      "left": 11.8,
+      "height": 10.7,
+      "width": 71.2
+    }
+  },
+  {
+    "id": "b5",
+    "page": 2,
+    "label": "Q9 (b)",
+    "text": "Move Plant B into bright sunlight. With more light energy available the rate of photosynthesis increases, so the plant produces more glucose and its leaves become green again.",
+    "isContinuation": false,
+    "isRoughWork": false,
+    "rect": {
+      "top": 20.8,
+      "left": 8.8,
+      "height": 10.2,
+      "width": 73
+    }
+  },
+  {
+    "id": "b6",
+    "page": 2,
+    "label": "Ans 6.",
+    "text": "Blood enters the right atrium from the vena cava, then goes to the right ventricle and out to the lungs. It comes back to the left atrium. Then the left ventricle, and leaves through the aorta to the body.",
+    "isContinuation": false,
+    "isRoughWork": false,
+    "rect": {
+      "top": 33.5,
+      "left": 8.8,
+      "height": 13,
+      "width": 72.7
+    }
+  },
+  {
+    "id": "b7",
+    "page": 3,
+    "label": "Q10 (ii)",
+    "text": "Blood at high pressure enters the glomerulus. The pressure forces water, glucose, salts and urea through the capillary wall into the Bowman's capsule. This is ultrafiltration. Large molecules like proteins and blood cells stay behind.",
+    "isContinuation": false,
+    "isRoughWork": false,
+    "rect": {
+      "top": 7.8,
+      "left": 8.8,
+      "height": 12.7,
+      "width": 73
+    }
+  },
+  {
+    "id": "b8",
+    "page": 3,
+    "label": "Q10 (i)",
+    "text": "The functional unit of the kidney is the nephron.",
+    "isContinuation": false,
+    "isRoughWork": false,
+    "rect": {
+      "top": 23,
+      "left": 8.8,
+      "height": 5,
+      "width": 60.7
+    }
+  },
+  {
+    "id": "b9",
+    "page": 3,
+    "label": "Q7(a)",
+    "text": "Pulmonary ventilation = tidal volume x breathing rate = 0.5 x 12 = 6 litres per minute",
+    "isContinuation": false,
+    "isRoughWork": false,
+    "rect": {
+      "top": 30.5,
+      "left": 8.8,
+      "height": 10.5,
+      "width": 67.7
+    }
+  },
+  {
+    "id": "b10",
+    "page": 3,
+    "label": null,
+    "text": "12 x 5 = 60 no wait that's wrong 0.5 x 12",
+    "isContinuation": false,
+    "isRoughWork": true,
+    "rect": {
+      "top": 44,
+      "left": 11.8,
+      "height": 4,
+      "width": 38.7
+    }
+  },
+  {
+    "id": "b11",
+    "page": 4,
+    "label": "Q9",
+    "text": "Resistance is the opposition offered by a conductor to the flow of electric current. Ohm's law states that the current through a conductor is directly proportional to the potential difference across it, provided temperature stays constant. V = IR",
+    "isContinuation": false,
+    "isRoughWork": false,
+    "rect": {
+      "top": 7.8,
+      "left": 8.8,
+      "height": 15.7,
+      "width": 72.7
+    }
+  },
+  {
+    "id": "b12",
+    "page": 4,
+    "label": null,
+    "text": "An alveolus is a tiny air sac in the lung. It is surrounded by a dense network of capillaries. Oxygen diffuses from the air space into the blood and carbon dioxide diffuses out. The wall is only one cell thick to speed up diffusion.",
+    "isContinuation": false,
+    "isRoughWork": false,
+    "rect": {
+      "top": 26.5,
+      "left": 11.8,
+      "height": 10,
+      "width": 68
+    }
+  },
+  {
+    "id": "b13",
+    "page": 4,
+    "label": "Q3",
+    "text": "The SI unit of resistance is the Watt.",
+    "isContinuation": false,
+    "isRoughWork": false,
+    "rect": {
+      "top": 39,
+      "left": 8.8,
+      "height": 4,
+      "width": 42.2
+    }
+  },
+  {
+    "id": "b14",
+    "page": 5,
+    "label": "Q13",
+    "text": "Newton's second law states that force equals mass times acceleration, F = ma.",
+    "isContinuation": false,
+    "isRoughWork": false,
+    "rect": {
+      "top": 7.8,
+      "left": 8.8,
+      "height": 6.2,
+      "width": 70.2
+    }
+  },
+  {
+    "id": "b15",
+    "page": 5,
+    "label": "Q8",
+    "text": "Palisade mesophyll cells are long and packed tightly near the top of the leaf and they have many chloroplasts, so they absorb most of the light. Spongy mesophyll cells are round and loosely packed with big air spaces between them, which lets gases diffuse easily to and from the cells.",
+    "isContinuation": false,
+    "isRoughWork": false,
+    "rect": {
+      "top": 17,
+      "left": 8.8,
+      "height": 17,
+      "width": 74.7
+    }
+  }
+]

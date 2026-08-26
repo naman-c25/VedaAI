@@ -1,0 +1,13 @@
+node_modules
+.next
+out
+
+# Secrets — never commit
+.env
+.env.*
+!.env.local.example
+
+.vercel
+public/pdf.worker.min.mjs
+dev.log
+fixtures/.refine.mjs
