@@ -175,7 +175,9 @@ console.log(
   `\n  pages resolved : ${pagesResolved}/${truth.pages.length}` +
     `\n  boxes >=0.5 IoU: ${derivedOk}/${derivedTotal}`
 );
-const fallbackOk = pagesResolved >= truth.pages.length - 1 && derivedOk === derivedTotal;
+// Every page must resolve: one that does not means every answer on it loses its
+// position, which is how 7(a), 10(i) and 10(ii) — all on page 3 — went missing.
+const fallbackOk = pagesResolved === truth.pages.length && derivedOk === derivedTotal;
 console.log(
   fallbackOk
     ? "PASS  ink-band fallback recovers usable positions"

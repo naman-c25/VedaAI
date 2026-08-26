@@ -214,14 +214,61 @@ border and the panel says how many were placed that way.
 ```
 page 1: 3 answers matched, mean IoU 0.979    ← name header correctly dropped
 page 2: 3 answers matched, mean IoU 0.991
-page 3: 5 ink bands vs 4 answers — no confident mapping, left unlocated
+page 3: 4 answers matched, mean IoU 0.965
 page 4: 3 answers matched, mean IoU 0.985
 page 5: 2 answers matched, mean IoU 0.991
+
+pages resolved: 5/5     boxes >=0.5 IoU: 15/15
 ```
 
-Page 3 declining is the feature working, not failing.
+Getting to 5/5 took a bug fix of its own — see §3.6.
 
-## 3.6 Sub-part matching was brittle, and my test did not catch it
+## 3.6 One threshold, picked by eye, silently broke a whole page
+
+The position-recovery fallback resolved four pages out of five. Page 3 always refused:
+
+```
+page 3: 5 ink bands vs 4 answers — no confident mapping
+```
+
+I had left that as "the feature working, not failing" — refusing to guess is the correct behaviour
+when the counts disagree. That was too comfortable an explanation, and it hid a real bug.
+
+**The consequence was specific and bad.** Every answer on page 3 loses its position when the page
+does not resolve — and page 3 is where 7(a), 10(i) and 10(ii) live. Clicking those sub-parts did
+nothing at all, while every other question worked. It looked like a sub-part bug. It was a
+threshold bug.
+
+The cause: the two-line rough-work block was splitting into **two** bands. Both the gap between
+lines *inside* an answer and the gap *between* answers are blank runs, and I had set the separator
+to `0.014` — numerically identical to the line gap. Answers with short glyphs and few ascenders
+have slightly wider line gaps, so they split.
+
+Rather than nudge the number until page 3 passed, I swept it against ground truth
+(`scripts/tune-gap.mjs`):
+
+```
+BLOCK_GAP   pages resolved   boxes >=0.75   mean IoU
+  0.014         4/5             11/11         0.986     ← the bug
+  0.018         5/5             15/15         0.980
+  0.022         5/5             15/15         0.980     ← chosen
+  0.025         5/5             15/15         0.980
+  0.030         5/5             15/15         0.968
+  0.035         0/5              0/0          0.000     ← answers merge together
+```
+
+The sweep's own "best score" was `0.018`, and I did not take it — it sits one step from the cliff
+where the bug returns. `0.022` is the middle of the flat region, furthest from failure in both
+directions. **Tuning to the top score and tuning for robustness are different things**, and on a
+threshold that has to generalise to handwriting I have never seen, the second matters more.
+
+Splitting *inside* a known box still uses the tighter `0.014` — that path measures 0.980 and was
+not touched. Two jobs, two thresholds.
+
+`scripts/test-boxes.mjs` now requires **all** pages to resolve, not all-but-one. The old assertion
+tolerated exactly the failure that caused this.
+
+## 3.7 Sub-part matching was brittle, and my test did not catch it
 
 Sub-part answers (7a, 10ii) intermittently failed to map. The tests passed, because matching was
 done on the printed label alone and my fixture happened to produce labels where that worked. Two
@@ -240,7 +287,7 @@ on it would have left the suite green. `scripts/test-mapping.mjs` now covers all
 model's mapping **forced empty**, so only the deterministic path can produce a match — 14/14, no
 API calls. Sub-parts no longer depend on the model having done its job.
 
-## 3.7 Feedback took four iterations to get right
+## 3.8 Feedback took four iterations to get right
 
 | Version | Problem |
 |---|---|
@@ -272,7 +319,7 @@ The student's name and roll number are still read off the sheet header — but o
 recognised **as a header** and never emitted as an answer block, which otherwise leaves it
 floating in the unmatched list.
 
-## 3.8 Twice, the test was wrong and the app was fine
+## 3.9 Twice, the test was wrong and the app was fine
 
 Worth recording, because the instinct to "fix the app" would have been wrong both times.
 
@@ -286,13 +333,13 @@ and picked up `reset()`'s `setProgress(0)`, making progress look like it went ba
 local `norm()` did not strip a leading `q`, so `norm("Q4")` was `"q4"` and a `startsWith("4")`
 check failed. Both were fixed in the test, not the app.
 
-## 3.9 The API key would have been committed
+## 3.10 The API key would have been committed
 
 The original `.gitignore` had `.env*.local`, which does **not** match `.env` — and that is where
 the key ended up. Widened to ignore `.env` and `.env.*`. Verified: `git ls-files` shows zero
 `.env` files tracked.
 
-## 3.10 Smaller ones
+## 3.11 Smaller ones
 
 - **pdf.js worker.** Resolving it through a bundler specifier is fragile across Webpack and
   Turbopack. A prebuild script copies it into `public/`, which works identically locally and on
@@ -419,7 +466,7 @@ verify-requirements  34/34 claims verified      ← also verified against the li
 verify-scope         23/23 claims verified
 test-pipeline        35/35 checks passed (2 known marks issues, reported as KNOWN)
 test-mapping         14/14 checks passed                              (no API)
-test-boxes           0.883 → 0.980 mean IoU, 0 worsened; fallback 11/11 (no API)
+test-boxes           0.883 → 0.980 mean IoU, 0 worsened; fallback 5/5 pages, 15/15 (no API)
 
 evaluate.mjs
   100.0%  Question extraction — every question found         16/16, 0 spurious
