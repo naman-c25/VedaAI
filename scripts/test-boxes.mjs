@@ -184,3 +184,41 @@ console.log(
     : "REVIEW  ink-band fallback needs a look"
 );
 if (!fallbackOk) process.exitCode = 1;
+
+/* ==================================================================== */
+/* Robustness: an oversized model box must not swallow the next answer   */
+/* ==================================================================== */
+console.log("\n=== OVERSIZED-BOX ROBUSTNESS (no API) ===");
+
+let swallowed = 0;
+let checked = 0;
+for (let p = 0; p < truth.pages.length; p++) {
+  const blocksOnPage = truth.pages[p].blocks;
+  for (let i = 0; i < blocksOnPage.length - 1; i++) {
+    const me = blocksOnPage[i].rect;
+    const next = blocksOnPage[i + 1].rect;
+
+    // Simulate the model returning a box that runs 60% of the way into the
+    // gap below — the shape that produced a 0.694 IoU on a live run.
+    const overshoot = (next.top - (me.top + me.height)) * 0.6;
+    const inflated = { ...me, height: me.height + Math.max(overshoot, 0) + 1.2 };
+
+    const refined = refineRect(masks[p], inflated);
+    const vsMine = iou(refined, me);
+    const vsNext = iou(refined, next);
+    checked++;
+    if (vsNext > 0.15 || vsMine < 0.6) {
+      swallowed++;
+      console.log(
+        `  page ${p + 1} block ${i + 1}: refined IoU own=${vsMine.toFixed(2)} neighbour=${vsNext.toFixed(2)}`
+      );
+    }
+  }
+}
+console.log(`  ${checked - swallowed}/${checked} inflated boxes snapped back to their own answer`);
+console.log(
+  swallowed === 0
+    ? "PASS  an oversized box never merges two answers"
+    : "REVIEW  some inflated boxes bled into a neighbour"
+);
+if (swallowed !== 0) process.exitCode = 1;

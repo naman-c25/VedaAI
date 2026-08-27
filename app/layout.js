@@ -6,6 +6,14 @@ export const metadata = {
     "Upload a question paper and a handwritten answer sheet, then map, grade and highlight every answer.",
 };
 
+// Explicit rather than relying on the framework default: the whole layout is
+// breakpoint-driven, so a phone has to report its real width.
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en">

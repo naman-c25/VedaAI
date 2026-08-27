@@ -25,6 +25,10 @@ async function callApi(payload) {
 export default function Home() {
   const [stage, setStage] = useState("upload"); // upload | extracting | mapping
   const [collapsed, setCollapsed] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  // Which panel the phone layout is showing. Ignored at lg and above, where both
+  // panels are visible at once, so it can be set unconditionally.
+  const [mobileTab, setMobileTab] = useState("questions");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -103,6 +107,7 @@ export default function Home() {
     setProgress(0);
     setError("");
     setCollapsed(false);
+    setMobileTab("questions");
   }
 
   const allExpanded = useMemo(
@@ -122,6 +127,10 @@ export default function Home() {
   function selectQuestion(id) {
     setActiveId(id);
     setExpandedIds((prev) => new Set(prev).add(id));
+    // On a phone the highlight lives on the other tab; without this, tapping a
+    // question would appear to do nothing. Harmless on desktop, where both
+    // panels are on screen and the tab state is unused.
+    setMobileTab("answers");
   }
 
   /**
@@ -173,11 +182,33 @@ export default function Home() {
   const activeQuestion = result?.questions.find((q) => q.id === activeId) ?? null;
 
   return (
-    <div className="flex h-screen gap-3 p-3">
-      <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
+    <div className="flex h-[100dvh] gap-0 p-0 lg:gap-3 lg:p-3">
+      {/* Desktop: the sidebar is part of the layout. */}
+      <div className="hidden lg:flex">
+        <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
+      </div>
 
-      <main className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-line bg-white">
-        <TopBar onBack={reset} canGoBack={stage !== "upload"} />
+      {/* Phone: the same sidebar, as a drawer over the content. */}
+      {drawerOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <button
+            type="button"
+            aria-label="Close menu"
+            onClick={() => setDrawerOpen(false)}
+            className="absolute inset-0 bg-black/40"
+          />
+          <div className="absolute left-0 top-0 flex h-full p-3">
+            <Sidebar collapsed={false} onToggle={() => setDrawerOpen(false)} />
+          </div>
+        </div>
+      )}
+
+      <main className="flex min-w-0 flex-1 flex-col overflow-hidden bg-white lg:rounded-2xl lg:border lg:border-line">
+        <TopBar
+          onBack={reset}
+          canGoBack={stage !== "upload"}
+          onMenu={() => setDrawerOpen(true)}
+        />
 
         {stage === "upload" && (
           <UploadScreen
@@ -198,27 +229,59 @@ export default function Home() {
         )}
 
         {stage === "mapping" && result && (
-          <div className="canvas-wash flex min-h-0 flex-1 gap-3 p-3">
-            <QuestionPanel
-              questions={result.questions}
-              unmatched={result.unmatched}
-              summary={result.summary}
-              activeId={activeId}
-              expandedIds={expandedIds}
-              onSelect={selectQuestion}
-              onToggle={toggleExpand}
-              onExpandAll={expandAll}
-              onMaxScoreChange={changeMaxScore}
-              onScoreChange={changeScore}
-              allExpanded={allExpanded}
-            />
-            <AnswerSheetPanel
-              pages={answer.pages}
-              activeQuestion={activeQuestion}
-              unmatched={result.unmatched}
-              highlightsUnavailable={result.summary.highlightsUnavailable}
-              highlightsEstimated={result.summary.highlightsEstimated}
-            />
+          <div className="canvas-wash flex min-h-0 flex-1 flex-col gap-2.5 p-2.5 lg:flex-row lg:gap-3 lg:p-3">
+            {/* There is no room for two panels on a phone, so they become tabs. */}
+            <div className="flex shrink-0 gap-1 rounded-full border border-line bg-white p-1 lg:hidden">
+              {[
+                ["questions", "Questions"],
+                ["answers", "Answer Sheet"],
+              ].map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setMobileTab(key)}
+                  className={`flex-1 rounded-full py-1.5 text-[13px] font-semibold transition ${
+                    mobileTab === key ? "bg-ink text-white" : "text-[#6f6f6f]"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            <div
+              className={`min-h-0 min-w-0 flex-1 lg:flex lg:flex-none ${
+                mobileTab === "questions" ? "flex" : "hidden"
+              }`}
+            >
+              <QuestionPanel
+                questions={result.questions}
+                unmatched={result.unmatched}
+                summary={result.summary}
+                activeId={activeId}
+                expandedIds={expandedIds}
+                onSelect={selectQuestion}
+                onToggle={toggleExpand}
+                onExpandAll={expandAll}
+                onMaxScoreChange={changeMaxScore}
+                onScoreChange={changeScore}
+                allExpanded={allExpanded}
+              />
+            </div>
+
+            <div
+              className={`min-h-0 min-w-0 flex-1 lg:flex ${
+                mobileTab === "answers" ? "flex" : "hidden"
+              }`}
+            >
+              <AnswerSheetPanel
+                pages={answer.pages}
+                activeQuestion={activeQuestion}
+                unmatched={result.unmatched}
+                highlightsUnavailable={result.summary.highlightsUnavailable}
+                highlightsEstimated={result.summary.highlightsEstimated}
+              />
+            </div>
           </div>
         )}
       </main>

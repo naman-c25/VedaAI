@@ -136,23 +136,23 @@ export default function UploadScreen({
   }
 
   return (
-    <div className="canvas-wash flex flex-1 items-center justify-center overflow-y-auto px-6 py-8">
+    <div className="canvas-wash flex flex-1 items-center justify-center overflow-y-auto px-4 py-6 sm:px-6 sm:py-8">
       <div className="w-full max-w-160">
-        <h1 className="text-center text-[32px] font-extrabold leading-tight tracking-tight">
+        <h1 className="text-center text-[24px] font-extrabold leading-tight tracking-tight sm:text-[28px] lg:text-[32px]">
           Upload{" "}
           <span className="rounded-md bg-brand-soft px-2 py-0.5 text-brand">
             Question Paper &amp; Answer Sheets
           </span>
         </h1>
-        <p className="mt-2 text-center text-[14px] text-[#6f6f6f]">
+        <p className="mt-2 text-center text-[13px] text-[#6f6f6f] sm:text-[14px]">
           Upload both files to get started
         </p>
 
-        <div className="mt-6 flex justify-center">
+        <div className="mt-5 flex justify-center sm:mt-6">
           <TeacherMark />
         </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="mt-5 grid grid-cols-1 gap-3.5 sm:mt-6 sm:grid-cols-2 sm:gap-4">
           <DropCard
             title="Upload"
             accentWord="Question Paper"

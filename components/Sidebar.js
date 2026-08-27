@@ -79,17 +79,23 @@ export default function Sidebar({ collapsed, onToggle }) {
           ))}
         </nav>
 
-        <div className="flex-1" />
-
-        <SchoolCrest size={26} />
+        {/* Sits directly under the nav rather than at the foot of the rail: the
+            way back to the full sidebar should be near what it expands, not
+            hidden below the school card. Deliberately larger and heavier than
+            the nav icons so it reads as a control, not another destination. */}
         <button
           type="button"
           onClick={onToggle}
-          className="mt-3 grid h-7 w-7 place-items-center rounded-md text-muted transition hover:bg-[#f5f5f5] hover:text-ink"
+          className="mt-3 grid h-9 w-11 place-items-center rounded-lg text-ink transition hover:bg-[#f0f0f0]"
           aria-label="Expand sidebar"
+          title="Expand sidebar"
         >
-          <ChevronsRight size={15} />
+          <ChevronsRight size={22} strokeWidth={2.75} />
         </button>
+
+        <div className="flex-1" />
+
+        <SchoolCrest size={26} />
       </aside>
     );
   }

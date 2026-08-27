@@ -68,10 +68,10 @@ export default function AnswerSheetPanel({
 
   return (
     <section className="flex min-w-0 flex-1 flex-col rounded-2xl border border-line bg-white">
-      <div className="flex h-11.5 shrink-0 items-center gap-3 border-b border-line px-4">
+      <div className="flex h-11.5 shrink-0 items-center gap-2 border-b border-line px-3 lg:gap-3 lg:px-4">
         <h2 className="text-[14px] font-bold">Answer Sheet</h2>
 
-        <div className="ml-1 flex items-center gap-2.5">
+        <div className="ml-1 hidden items-center gap-2.5 sm:flex">
           {["ok", "warn", "bad"].map((key) => (
             <span key={key} className="flex items-center gap-1 text-[11px] font-medium text-muted">
               <span className={`h-2 w-2 rounded-full ${TONES[key].dot}`} />

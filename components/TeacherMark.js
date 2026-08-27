@@ -3,7 +3,7 @@
 /** The concentric-ring teacher mark that anchors the upload screen. */
 export default function TeacherMark() {
   return (
-    <div className="relative grid h-33 w-33 place-items-center">
+    <div className="relative grid h-26 w-26 place-items-center sm:h-33 sm:w-33">
       <span className="absolute inset-0 rounded-full bg-brand/7" />
       <span className="absolute inset-3.25 rounded-full bg-brand/11" />
       <span className="absolute inset-0 animate-ring rounded-full ring-1 ring-brand/25" />
@@ -22,7 +22,7 @@ export default function TeacherMark() {
         />
       ))}
 
-      <svg viewBox="0 0 100 100" className="relative h-19 w-19">
+      <svg viewBox="0 0 100 100" className="relative h-15 w-15 sm:h-19 sm:w-19">
         <defs>
           <clipPath id="tm-clip">
             <circle cx="50" cy="50" r="50" />

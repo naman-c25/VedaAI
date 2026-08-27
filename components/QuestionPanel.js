@@ -300,8 +300,8 @@ export default function QuestionPanel({
   allExpanded,
 }) {
   return (
-    <section className="flex w-115 shrink-0 flex-col rounded-2xl border border-line bg-white">
-      <div className="flex h-11.5 shrink-0 items-center gap-3 border-b border-line px-4">
+    <section className="flex w-full flex-col rounded-2xl border border-line bg-white lg:w-115 lg:shrink-0">
+      <div className="flex h-11.5 shrink-0 items-center gap-2 border-b border-line px-3 lg:gap-3 lg:px-4">
         <h2 className="text-[13.5px] font-bold">
           Extracted Questions{" "}
           <span className="font-medium text-muted">(from question paper)</span>

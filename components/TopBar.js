@@ -7,6 +7,7 @@ import {
   Bell,
   Sparkles,
   ChevronDown,
+  Menu,
 } from "lucide-react";
 
 function Avatar() {
@@ -17,20 +18,27 @@ function Avatar() {
   );
 }
 
-export default function TopBar({ onBack, canGoBack }) {
+/**
+ * The bar carries a breadcrumb and the full action set on desktop. On a phone
+ * the brand replaces the breadcrumb and the secondary actions collapse into the
+ * drawer, leaving only what a thumb needs — matching the mobile design.
+ */
+export default function TopBar({ onBack, canGoBack, onMenu }) {
   return (
-    <header className="flex h-13 shrink-0 items-center gap-3 border-b border-line px-4">
+    <header className="flex h-13 shrink-0 items-center gap-2 border-b border-line px-3 lg:gap-3 lg:px-4">
       <button
         type="button"
         onClick={onBack}
         disabled={!canGoBack}
-        className="grid h-7 w-7 place-items-center rounded-md text-[#6f6f6f] transition enabled:hover:bg-[#f5f5f5] enabled:hover:text-ink disabled:cursor-default disabled:text-[#c9c9c9]"
+        className="grid h-8 w-8 shrink-0 place-items-center rounded-md text-[#6f6f6f] transition enabled:hover:bg-[#f5f5f5] enabled:hover:text-ink disabled:cursor-default disabled:text-[#c9c9c9]"
         aria-label="Back"
       >
         <ArrowLeft size={17} />
       </button>
 
-      <div className="flex items-center gap-1.5 text-[14px] font-medium text-[#5f5f5f]">
+      {/* Phone: the brand. Desktop: the breadcrumb. */}
+      <span className="text-[15px] font-extrabold tracking-tight lg:hidden">VedaAI</span>
+      <div className="hidden items-center gap-1.5 text-[14px] font-medium text-[#5f5f5f] lg:flex">
         <ClipboardList size={15} className="text-[#8b8b8b]" />
         Exams
       </div>
@@ -39,7 +47,7 @@ export default function TopBar({ onBack, canGoBack }) {
 
       <button
         type="button"
-        className="grid h-8 w-8 place-items-center rounded-full text-[#7d7d7d] transition hover:bg-[#f5f5f5]"
+        className="hidden h-8 w-8 place-items-center rounded-full text-[#7d7d7d] transition hover:bg-[#f5f5f5] lg:grid"
         aria-label="Help"
       >
         <HelpCircle size={17} />
@@ -47,7 +55,7 @@ export default function TopBar({ onBack, canGoBack }) {
 
       <button
         type="button"
-        className="relative grid h-8 w-8 place-items-center rounded-full text-[#7d7d7d] transition hover:bg-[#f5f5f5]"
+        className="relative grid h-8 w-8 shrink-0 place-items-center rounded-full text-[#7d7d7d] transition hover:bg-[#f5f5f5]"
         aria-label="Notifications"
       >
         <Bell size={17} />
@@ -56,7 +64,7 @@ export default function TopBar({ onBack, canGoBack }) {
 
       <button
         type="button"
-        className="grid h-8 w-8 place-items-center rounded-full text-brand transition hover:bg-brand-tint"
+        className="hidden h-8 w-8 place-items-center rounded-full text-brand transition hover:bg-brand-tint lg:grid"
         aria-label="AI assistant"
       >
         <Sparkles size={17} fill="currentColor" />
@@ -64,11 +72,20 @@ export default function TopBar({ onBack, canGoBack }) {
 
       <button
         type="button"
-        className="ml-1 flex items-center gap-2 rounded-full py-1 pl-1 pr-2 transition hover:bg-[#f5f5f5]"
+        className="flex shrink-0 items-center gap-2 rounded-full py-1 transition hover:bg-[#f5f5f5] lg:ml-1 lg:pl-1 lg:pr-2"
       >
         <Avatar />
-        <span className="text-[14px] font-semibold">Madhur Rastogi</span>
-        <ChevronDown size={14} className="text-[#9a9a9a]" />
+        <span className="hidden text-[14px] font-semibold lg:inline">Madhur Rastogi</span>
+        <ChevronDown size={14} className="hidden text-[#9a9a9a] lg:block" />
+      </button>
+
+      <button
+        type="button"
+        onClick={onMenu}
+        className="grid h-8 w-8 shrink-0 place-items-center rounded-md text-[#5f5f5f] transition hover:bg-[#f5f5f5] lg:hidden"
+        aria-label="Open menu"
+      >
+        <Menu size={19} />
       </button>
     </header>
   );
