@@ -136,8 +136,25 @@ is blank* — then verified the stray stays unmatched **and** both content match
 a 1-mark recall question, where it's the right answer; the check now targets questions that *lost*
 marks. And the requirements verifier had two bugs of its own. Fixed the tests, not the code.
 
-Also: the original `.gitignore` had `.env*.local`, which doesn't match `.env` — where the key
-actually was. Widened before anything was pushed.
+### The rest, briefly
+
+| Problem | Fix |
+|---|---|
+| Struck-through rough work was absorbed into the answer above it — an 18%-tall box for a 3-line answer | Explicit rough-work rule in the prompt, **and** force-excluded in `assemble.js` regardless of what the model claims |
+| That fix over-generalised: the mapper then dropped *all* unlabelled answers, losing a valid content match | Scoped the rule to `isRoughWork` only, spelled out in the prompt. Caught by the existing test |
+| An oversized model box merged two answers — a confident highlight on the wrong one | A band must now be *substantially* inside the box (≥25% of its height), not merely touching. Tested by inflating every true box 60% into the gap below: 10/10 snap back |
+| `gemini-2.5-flash` returns `{"questions": […]}`, `gemini-3.1-flash-lite` a bare array — reading only the named key meant "nothing found" | `pickArray()` accepts either shape |
+| Feedback was often a bare `"Correct."` — accurate, teaches nothing | Prompt requires subject vocabulary plus one factual extension even on full marks; `missing[]` lists what cost marks. Shortest feedback went 58 → 145 chars |
+| Tried third-person feedback using the student's name | Reverted — the direct "you" voice reads better. Name still read, but only so the sheet header isn't mistaken for an answer |
+| pdf.js worker resolved through a bundler specifier is fragile across Webpack/Turbopack | Prebuild script copies it to `public/` — identical locally and on Vercel |
+| Tailwind v4 drops the default `cursor: pointer` on buttons | One rule in `globals.css` covering buttons, `[role=button]`, labels, selects |
+| Converting 28 arbitrary values (`h-[46px]`) to canonical (`h-11.5`) | Checked the *generated CSS* for every one — an unsupported class emits nothing and breaks layout silently, which is worse than the lint warning |
+| The app wasn't responsive at all — one breakpoint in the whole codebase, and a fixed `w-115` panel | `lg` breakpoint throughout: sidebar → drawer, cards stack, panels → tabs |
+| `.gitignore` had `.env*.local`, which doesn't match `.env` — where the key actually was | Widened before anything was pushed |
+
+One I couldn't solve the way I wanted: reproducing the PDF upload path in Node segfaulted (pdf.js
+with native canvas). Rather than fight the tooling, I found the sub-part bug through unit tests
+instead — which turned out to be the better test anyway, since it doesn't depend on the model.
 
 ---
 
